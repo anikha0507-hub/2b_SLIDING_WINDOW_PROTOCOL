@@ -8,6 +8,71 @@
 5. If your frames reach the server it will send ACK signal to client
 6. Stop the Program
 ## PROGRAM
+1.SERVER.PY
+```
+import socket
+
+s = socket.socket()
+
+# allow port reuse
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+s.bind(('localhost', 9000))
+s.listen(1)
+
+print("Waiting for connection...")
+
+conn, addr = s.accept()
+print("Connected to", addr)
+
+while True:
+    data = conn.recv(1024).decode()
+
+    if not data:
+        break
+
+    print("Frames received:", data)
+
+    ack = "ACK for " + data
+    conn.send(ack.encode())
+
+conn.close()
+s.close()
+```
+2.CLIENT.PY
+```
+import socket
+
+s = socket.socket()
+
+# connect to same port used in server
+s.connect(('localhost', 9000))
+
+n = int(input("Enter number of frames: "))
+w = int(input("Enter window size: "))
+
+frames = list(range(1, n+1))
+i = 0
+
+while i < n:
+    send_frames = frames[i:i+w]
+    msg = " ".join(map(str, send_frames))
+
+    print("Sending frames:", msg)
+    s.send(msg.encode())
+
+    ack = s.recv(1024).decode()
+    print("Received:", ack)
+
+    i += w
+
+s.close()
+```
 ## OUPUT
+<img width="1422" height="277" alt="image" src="https://github.com/user-attachments/assets/ec610624-8dd5-47bb-a10d-2a5bae4665cb" />
+<img width="1426" height="182" alt="image" src="https://github.com/user-attachments/assets/b461fff4-1a9e-46e3-92ef-243a3519f9f2" />
+
+
+
 ## RESULT
 Thus, python program to perform stop and wait protocol was successfully executed
